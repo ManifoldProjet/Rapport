@@ -24,20 +24,84 @@
 
 \begin{multicols}{2}
 \section{Objectifs}
-Ce projet a pour but de conduire une étude numérique de la performance des techniques vues en cours. Nous avons appliqué des méthodes et techniques étudiées sur des jeux de données artificiels et réels. Le travail s’articule sur 3 axes: simulation, estimation, comparaison.
-L'objectif et de mieux appréhender l'intéret de ces différentes techniques de réduction de dimension et de comprendre leurs pertinences et leurs limites grâce à des moyens de comparaisons.
+
+Ce projet a pour but de conduire une étude numérique de la performance des techniques vues en cours. Nous avons appliqué des méthodes et techniques étudiées sur des jeux de données artificiels et réels. Le travail s’articule sur 3 axes: simulation, estimation, comparaison.\\
+
+L'objectif et de mieux appréhender l'intéret de ces différentes techniques de réduction de dimension et de comprendre leurs pertinences et leurs limites grâce à des moyens de comparaisons.\\
+
 \section{Matériels et méthodes}
-Dans cette nous allons expliciter les techniques que nous avons utilisés pour ce projet.
-Nous avons développé notre code avec le langage de programmation R
+Dans cette partie nous allons expliciter les techniques que nous avons utilisés pour ce projet.\\
+
+Nous avons développé notre code avec le langage de programmation R en utilisant l'IDE Rstudio. Nous avons versionné notre code avec Git, et stocké le code sur Github dans une organisation dédiée avec un dossier distant pour le code en R et un dossier distant pour le code Latex de notre rapport.\\
 \section{Données}
-Ici nous allons décrire pourquoi nous avons choisis ces données et les décrire. 
-Pour les données nous avons choisis de prendre comme données synthétique un dataset modélisant un swissroll, une helix et une sphère. Pour le jeux de données réels nous avons pris le jeu de données MNIST.
+Ici nous allons epxliquer pourquoi nous avons choisis ces données et les décrire. \\
+Nous avons choisis de prendre comme données synthétique un dataset modélisant un swissroll, une helix et une sphère. Pour le jeux de données réels nous avons pris le jeu de données MNIST.\\
+Pour les données synthétiques le swissroll paraissait être un bon choix étant donné que cette forme très couramment utilisé pour tester les méthodes de réduction de dimension. Sa dimension intrinsèque étant évidente nous pouvons anticiper facilement le résultat après une réduction de dimension et l'évaluer même à l'oeil nu.\\
+L'helix nous a paru intéressante également car la forme est plus complexe que le swissroll mais reste assez simple à manipuler pour les mêmes raisons que le swissroll, la raison étant que sa dimension intrinsèque est évidente. Nous nous attendions à obtenir des résultats différents selon les algorithmes employés et les datasets employés, malgrès que ces formes puissent comporter quelques similarités. 
+La sphère quand à elle, de manière à dénoté avec les deux formes précédentes.\\
+
+Pour terminer nous avons choisis comme datasets de données réelles le dataset MNIST\cite{MNIST}. Nous avons choisis ce dataset pour plus de simpliciter dans les traitements. Ce dataset nécessité aussi peu de pré-traitement et permet d'avoir un exemple probant comportant des classes.\\
+
 \section{Expériences numériques sur les 
 données artificielles }
 Cette section a pour but de détailler de notre étude afin de rendre notre travail reproductible.
-Nous avons utilisé plusieurs packages R pour générer les données et employer des techniques de réduction de dimension dessus. 
+Nous avons utilisé plusieurs packages R pour générer les données et employer des techniques de réduction de dimension dessus.\\
+
+Pour le swissroll nous avons utilisé les packages rgl et vegan.
+Pour l'helix nous avons eu besoin d'aucun package supplémentaire, tandis que nous avons eu recours aux packages ggm et rgl pour construire la sphere.\\ 
+
+Par la suite nous avons appliquer les techniques de réduction de dimension en grande partie avec le package dimRed. Pour plus de simpliciter nous avons utilisé les formes pourvues par ce package. En effet le pacakge dimRed fournit ses propres fonctions pour les formes citées au dessus et permet d'appliquer ensuite des techniques de réduction de dimension. Les méthodes de réduction de dimension fournies par le package dimRed utilise en argument des objet de type S4. Les objets obtenus après application de la méthode loadDataSet du package dimRed retourne directement des objets S4 au bon format ( objet S4 de class dimRedData).\\
+
+Pour utiliser la méthode loadDataSet il suffit de fournir en paramêtre la chaîne de caractère du nom du dataset, par exemple "Swiss Roll" ou "helix" et de renseiner le nombre de point voulu. \\
+
+Ensuite nous avons choisi de sélectionner 3 méthodes de réduction de dimension : 
+\begin{itemize}
+    \item kernel-PCA : kPCA
+    \item Local linear Embedding : lle
+    \item t-Distributed Stochastic Neighborhood Embedding : t-SNE
+\end{itemize}
+
+Nous avons voulu appliquer des techniques permettant d'obtenir des représentation graphiques assez claires une fois la réduction de dimension faites, des techniques dont nous savions qu'une partie du vosinnage et des informations des formes seraient préservée. \\
+
+Lle est un cas spécifique du kernel-PCA mais nous avons juger intéressant de l'utiliser en plus du kernel-PCA sur nos jeux données pour pouvoir ensuite constater la qualité de la réduction de dimension.\\
+
+t-SNE se démarque par son approche stochastique. Elle utilise la divergence de Kullback-Leibler pour rassembler des clusters de points ou bien éloigner les points les un des autres en réduisant la dimension. En passant de plusieurs dimensions à 2, la projection en 2 dimensions avec t-SNE permet d'apprécier cette charactéristique. Cet algorithme est très efficace sur des données comme celles du dataset MNIST. Ce que nous constaterons plus tard dans ce rapport. 
+
 \section{Comparaison des méthodes }
 Pour comparer les méthodes de réduction de dimension nous avons employé les packages dimRed et coRanking. 
+La comparaison des méthodes de réduction de dimension n'est pas chose aisée. En effet plusieurs techniques de réduction de dimension utilise différents algorithmes qui permettent de miniser une quantité et donc un aspect lors de la réduction de dimension. \\
+
+En fonction du jeu de données et de l'ojectif final recherché, certaines techniques vont être plus appropriées et offrir de meilleurs résultats. \\
+
+Nous avons identifier grâce au package dimRed 3 manières d'estimer la qualité des techniques des réduction de dimension employées. 
+
+\begin{itemize}
+    \item En utilisant divers mesures dérivées de la matrice de co-ranking
+    \item Utiliser la corrélation cophenetique
+    \item En utilisant l'erreur de reconstruction
+\end{itemize}
+
+\subsection{Mesures dérivées de la matrice de co-ranking}
+La matrice de co-raning est la plus intéressante dans notre cas pour estimer la qualité de la réduction de dimension entre nos méthodes. 
+
+La matrice de co-ranking permet d'établir des rangs dans la matrice des distances en basse dimension et haute dimension. \\
+
+expliquer le phénomène des rangs \\
+
+Ce qu'il est intéressant de noter c'est que les valeurs différentes de 0 seront concentrées sur la diagonale de la matrice si la réduction de dimension s'est bien déroulée. 
+Si les valeurs diiférentes de 0 se concentrent dans le triangle bas de la matrice, cela veut dire que la réduction de dimension a trop rapprochée les points qui étaient éloignés dans le jeu de données d'origine. A l'inverse si le triangle supérieur contient le plus de valeurs différentes de 0 alors la réduction de dimension a éloigné les points qui étaient au départ proches. \\
+
+\subsection{Corrélation cophénétique}
+Cette méthode consiste a étudiet la corrélation entre le haut et le bas triangles des matrices de distance dans un espace de dimension haute et basse.\\
+
+\subsection{L'erreur de reconstruction}
+L'erreur de reconstruction implique qu'une fonction inverse existe à partir de la fonction de réduction de dimension employée. Ainsi avec le résultat obtenu par la fonction de réduction de dimension nous pourrons appliquer sa fonction inverse et mesurer les différences entre le jeu de données d'origine et le jeu de données reconstitué avec la fonction inverse. \\ 
+
+Toutes nos méthodes de réduction de dimension n'ayant pas de fonction inverse, nous n'avons pas employé cette technique pour les comparer.\\
+
+ 
+
+
 \section{Application sur données réelles. }
 Nous avons utilisé la même suite d'opérations sur les données synthétiques que sur les données réelles. 
 \end{multicols}
